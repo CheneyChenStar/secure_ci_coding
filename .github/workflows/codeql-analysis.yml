@@ -2,7 +2,7 @@ name: "CodeQL Security Analysis"
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, 'training/**']
     paths-ignore:
       - 'docs/**'
       - '**.md'

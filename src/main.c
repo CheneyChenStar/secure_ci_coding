@@ -147,6 +147,21 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    /* Parse username from environment for initial setup */
+    const char *env_val = getenv("SECUREFILE_ADMIN_USER");
+    if (env_val) {
+        size_t env_len = strlen(env_val);
+        if (env_len >= MAX_USERNAME_LEN) {
+            fprintf(stderr, "SECUREFILE_ADMIN_USER too long (%zu chars, max %d)\n",
+                    env_len, MAX_USERNAME_LEN - 1);
+            return 1;
+        }
+        char env_user[MAX_USERNAME_LEN];
+        strncpy(env_user, env_val, sizeof(env_user) - 1);
+        env_user[sizeof(env_user) - 1] = '\0';
+        printf("[*] Admin user from env: %s\n", env_user);
+    }
+
     /* Validate CLI-supplied paths before use */
     if (strlen(config_path) >= MAX_PATH_LEN ||
         strlen(data_dir) >= MAX_PATH_LEN ||

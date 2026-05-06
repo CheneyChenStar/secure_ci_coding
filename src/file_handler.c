@@ -1,6 +1,7 @@
 #include "file_handler.h"
 #include "logger.h"
 #include <dirent.h>
+#include <limits.h>
 
 static char g_data_dir[MAX_PATH_LEN] = "/tmp/securefile_data";
 
@@ -69,13 +70,13 @@ int file_store(const char *filename, const char *data, size_t data_len) {
     }
     snprintf(full_path, sizeof(full_path), "%s/%s", g_data_dir, filename);
 
-    char resolved[MAX_PATH_LEN];
+    char resolved[PATH_MAX];
     if (realpath(full_path, resolved) == NULL) {
         /* realpath failed: file may not exist yet, resolve parent */
         char *last_slash = strrchr(full_path, '/');
         if (last_slash) {
             *last_slash = '\0';
-            char parent_resolved[MAX_PATH_LEN];
+            char parent_resolved[PATH_MAX];
             if (realpath(full_path, parent_resolved) != NULL) {
                 /* Verify parent is under g_data_dir */
                 if (strncmp(parent_resolved, g_data_dir, strlen(g_data_dir)) != 0) {
@@ -153,7 +154,7 @@ int file_retrieve(const char *filename, char *out, size_t *out_len) {
 
 #ifdef FIXED
     /* Double-check with realpath */
-    char resolved[MAX_PATH_LEN];
+    char resolved[PATH_MAX];
     if (realpath(full_path, resolved) == NULL) {
         LOG_ERROR("Cannot resolve path: %s", full_path);
         return -1;

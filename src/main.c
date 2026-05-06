@@ -147,6 +147,14 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    /* Validate CLI-supplied paths before use */
+    if (strlen(config_path) >= MAX_PATH_LEN ||
+        strlen(data_dir) >= MAX_PATH_LEN ||
+        strlen(log_path) >= MAX_PATH_LEN) {
+        fprintf(stderr, "Path argument too long\n");
+        return 1;
+    }
+
     /* Initialize subsystems */
     printf("[*] Initializing SecureFile Vault Server...\n");
 

@@ -35,7 +35,8 @@ void log_write(log_level_t level, const char *format, ...) {
     }
 
     time_t now = time(NULL);
-    struct tm *tm_info = localtime(&now);
+    struct tm tm_buf;
+    struct tm *tm_info = localtime_r(&now, &tm_buf);
     char time_buf[32];
     strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", tm_info);
 

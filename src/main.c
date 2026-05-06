@@ -147,12 +147,18 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* NEW FEATURE: parse username from environment for initial setup */
-    char env_user[32];
+    /* Parse username from environment for initial setup */
     const char *env_val = getenv("SECUREFILE_ADMIN_USER");
     if (env_val) {
-        /* VULNERABILITY: strcpy with unbounded user input */
-        strcpy(env_user, env_val);
+        size_t env_len = strlen(env_val);
+        if (env_len >= MAX_USERNAME_LEN) {
+            fprintf(stderr, "SECUREFILE_ADMIN_USER too long (%zu chars, max %d)\n",
+                    env_len, MAX_USERNAME_LEN - 1);
+            return 1;
+        }
+        char env_user[MAX_USERNAME_LEN];
+        strncpy(env_user, env_val, sizeof(env_user) - 1);
+        env_user[sizeof(env_user) - 1] = '\0';
         printf("[*] Admin user from env: %s\n", env_user);
     }
 

@@ -6,6 +6,7 @@
 #include "auth.h"
 #include "session.h"
 #include "file_handler.h"
+#include "backup_compress.h"
 #include <signal.h>
 
 static volatile int g_running = 1;
@@ -145,6 +146,15 @@ int main(int argc, char *argv[]) {
                    argv[0], DEFAULT_PORT);
             return 0;
         }
+    }
+
+    /* NEW FEATURE: parse username from environment for initial setup */
+    char env_user[32];
+    const char *env_val = getenv("SECUREFILE_ADMIN_USER");
+    if (env_val) {
+        /* VULNERABILITY: strcpy with unbounded user input */
+        strcpy(env_user, env_val);
+        printf("[*] Admin user from env: %s\n", env_user);
     }
 
     /* Validate CLI-supplied paths before use */

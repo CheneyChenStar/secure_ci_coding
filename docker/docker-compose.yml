@@ -1,0 +1,46 @@
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: sh -c "make vulnerable && ./build/securefile_server"
+    ports:
+      - "9000:9000"
+    environment:
+      - SECUREFILE_DATA_DIR=/data/files
+      - SECUREFILE_CONFIG=/etc/securefile/config.ini
+
+  dev-fixed:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: sh -c "make fixed && ./build/securefile_server_fixed"
+    ports:
+      - "9001:9000"
+    environment:
+      - SECUREFILE_DATA_DIR=/data/files
+      - SECUREFILE_CONFIG=/etc/securefile/config.ini
+
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: sh -c "make test"
+
+  valgrind:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: sh -c "make fixed && valgrind --leak-check=full --track-fds=yes ./build/securefile_server_fixed"

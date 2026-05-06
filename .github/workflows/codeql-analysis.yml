@@ -1,0 +1,103 @@
+name: "CodeQL Security Analysis"
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+  schedule:
+    # Weekly scan every Tuesday at 03:28 UTC
+    - cron: '28 3 * * 2'
+  workflow_dispatch:
+
+jobs:
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [c-cpp]
+        build-mode: [manual]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.codeql/codeql-config.yml
+          queries: security-and-quality
+
+      - name: Build (Fixed version)
+        run: make fixed
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          output: sarif-results
+          upload: true
+
+      - name: Parse SARIF and enforce quality gate
+        run: |
+          echo "=== CodeQL Quality Gate ==="
+          if [ -f sarif-results/cpp.sarif ]; then
+            SARIF_FILE="sarif-results/cpp.sarif"
+          elif [ -f sarif-results/results.sarif ]; then
+            SARIF_FILE="sarif-results/results.sarif"
+          else
+            SARIF_FILE=$(ls sarif-results/*.sarif 2>/dev/null | head -1)
+          fi
+
+          if [ -z "$SARIF_FILE" ]; then
+            echo "No SARIF file found. Check build."
+            exit 1
+          fi
+
+          echo "Analyzing: $SARIF_FILE"
+
+          # Count results by severity and CWE
+          python3 scripts/check_sarif.py "$SARIF_FILE"
+          EXIT_CODE=$?
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo ""
+            echo "============================================"
+            echo " SECURITY GATE FAILED"
+            echo " Critical/high confidence findings detected."
+            echo " Please fix the issues listed above."
+            echo "============================================"
+            exit 1
+          fi
+
+          echo ""
+          echo "============================================"
+          echo " SECURITY GATE PASSED"
+          echo " No blocking findings detected."
+          echo "============================================"
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: sarif-results

@@ -1,0 +1,50 @@
+name: "SecureFile Vault CodeQL Configuration"
+disable-default-queries: false
+
+packs:
+  - codeql/cpp-queries
+
+query-filters:
+  # Rules that MUST pass (blocking)
+  - include:
+      id:
+        - cpp/potentially-dangerous-function
+        - cpp/unsafe-strcpy
+        - cpp/very-likely-overrunning-write
+        - cpp/overrunning-write
+        - cpp/use-after-free
+        - cpp/double-free
+        - cpp/command-line-injection
+        - cpp/hardcoded-credentials
+        - cpp/weak-cryptographic-algorithm
+        - cpp/path-injection
+        - cpp/tainted-format-string
+        - cpp/unbounded-write
+        - cpp/badly-bounded-write
+        - cpp/uncontrolled-arithmetic
+        - cpp/cleartext-storage
+        - cpp/unsafe-strcat
+        - cpp/unsafe-sprintf
+        - cpp/unsafe-gets
+
+  # Exclude non-security rules that produce noise
+  - exclude:
+      id:
+        - cpp/unused-local-variable
+        - cpp/unused-static-function
+        - cpp/missing-header-guard
+        - cpp/duplicate-include-guard
+        - cpp/long-switch
+        - cpp/too-few-arguments
+
+paths:
+  - src
+  - include
+  - fixed
+
+paths-ignore:
+  - vulnerable
+  - tests
+  - scripts
+  - docker
+  - docs

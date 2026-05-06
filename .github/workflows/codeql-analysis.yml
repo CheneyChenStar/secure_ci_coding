@@ -96,8 +96,4 @@ jobs:
           echo " No blocking findings detected."
           echo "============================================"
 
-      - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: sarif-results
+      # SARIF is already uploaded by codeql-action/analyze (upload: true)

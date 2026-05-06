@@ -20,13 +20,11 @@ endif
 
 VULN_SRCS = src/main.c src/network.c src/auth.c src/session.c \
             src/file_handler.c src/protocol.c src/config.c src/logger.c \
-            src/backup_compress.c
 VULN_OBJS = $(patsubst src/%.c,$(BUILD_DIR)/%.o,$(VULN_SRCS))
 
 FIXED_SRCS = src/main.c src/network.c src/auth.c src/session.c \
              src/file_handler.c src/protocol.c src/config.c src/logger.c \
-             src/backup_compress.c
-FIXED_OBJS = $(patsubst src/%.c,$(BUILD_DIR)/%_fixed.o,$(FIXED_SRCS))
+ FIXED_OBJS = $(patsubst src/%.c,$(BUILD_DIR)/%_fixed.o,$(FIXED_SRCS))
 
 VULN_DEMOS = $(wildcard vulnerable/*.c)
 FIXED_DEMOS = $(wildcard fixed/*.c)

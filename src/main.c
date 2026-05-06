@@ -6,7 +6,6 @@
 #include "auth.h"
 #include "session.h"
 #include "file_handler.h"
-#include "backup_compress.h"
 #include <signal.h>
 
 static volatile int g_running = 1;
